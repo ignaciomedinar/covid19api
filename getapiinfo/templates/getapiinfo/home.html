@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <script src="{% static '/getapiinfo/js/sorttable.js' %}"></script>  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     
+    <link rel="stylesheet" href="/static/getapiinfo/css/home.css">
+    <title>COVID-19</title>
+</head>
+<body>
+    <h3>COVID Numbers</h3>
+    <table id='table' class='sortable'>
+        <tr>
+            <th>Country</th>
+            <th>New Confirmed</th>
+            <th>Total Confirmed</th>
+            <th>New Deaths</th>
+            <th>Total Deaths</th>
+            <th>New Recovered</th>
+            <th>Total Recovered</th>
+            <th>Date</th>
+            <th>Premium</th>
+        </tr>
+        
+        {% for i in contents.Countries %}
+        <tr>
+            <td>{{ i.Country }}</td>
+            <td>{{ i.NewConfirmed }}</td>
+            <td>{{ i.TotalConfirmed }}</td>
+            <td>{{ i.NewDeaths }}</td>
+            <td>{{ i.TotalDeaths }}</td>
+            <td>{{ i.NewRecovered }}</td>
+            <td>{{ i.TotalRecovered }}</td>
+            <td>{{ i.Date }}</td>
+            <td>{{ i.Premium }}</td>
+        </tr>
+    {% empty %}
+    <ul>Nothing found</ul>
+    {% endfor %}
+    </table>
+
+    <script src="/static/getapiinfo/js/TweenJS-1.0.0/lib/tweenjs.js"></script>
+    <script src="/static/getapiinfo/js/TweenJS-1.0.0/src/tweenjs/plugins/CSSPlugin.js"></script>
+
+    {% block js %}
+    <script src="/static/getapiinfo/js/app.js"></script>
+    {% endblock js %}
+</body>
+</html>
