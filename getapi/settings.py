@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'getapiinfo',
+    'django.contrib.humanize',
+    'django_filters',
 ]
 
 MIDDLEWARE = [

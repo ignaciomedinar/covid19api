@@ -1,3 +1,5 @@
+{% load humanize %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,10 +10,43 @@
      
     <link rel="stylesheet" href="/static/getapiinfo/css/home.css">
     <title>COVID-19</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 </head>
-<body>
-    <h3>COVID Numbers</h3>
+<body onload="loadChart();">
+    <h3>COVID Data</h3>
+    <table id="tableGlobal">
+    
+        <tr>
+            <th>New Confirmed</th>
+            <td>{{ contents.Global.NewConfirmed|intcomma }}</td>
+        </tr>
+        <tr>
+            <th>Total Confirmed</th>
+            <td>{{ contents.Global.TotalConfirmed|intcomma }}</td>
+        </tr>
+        <tr>
+            <th>New Deaths</th>
+            <td>{{ contents.Global.NewDeaths|intcomma }}</td>
+        </tr>
+            <th>Total Deaths</th>
+            <td>{{ contents.Global.TotalDeaths|intcomma }}</td>
+        </tr>
+            <th>New Recovered</th>
+            <td>{{ contents.Global.NewRecovered|intcomma }}</td>
+        </tr>
+            <th>Total Recovered</th>
+            <td>{{ contents.Global.TotalRecovered|intcomma }}</td>
+        </tr>
+    
+    </table>
     <table id='table' class='sortable'>
+        {% comment %} <form method="{% url "search" %}"> {% endcomment %}
+        <form method="GET">
+            {% csrf_token %}
+            <input type="text">
+            <input type="submit" value="Buscar">
+            {{ myFilter }}
+        </form>
         <tr>
             <th>Country</th>
             <th>New Confirmed</th>
@@ -21,31 +56,104 @@
             <th>New Recovered</th>
             <th>Total Recovered</th>
             <th>Date</th>
-            <th>Premium</th>
         </tr>
         
         {% for i in contents.Countries %}
         <tr>
             <td>{{ i.Country }}</td>
-            <td>{{ i.NewConfirmed }}</td>
-            <td>{{ i.TotalConfirmed }}</td>
-            <td>{{ i.NewDeaths }}</td>
-            <td>{{ i.TotalDeaths }}</td>
-            <td>{{ i.NewRecovered }}</td>
-            <td>{{ i.TotalRecovered }}</td>
-            <td>{{ i.Date }}</td>
-            <td>{{ i.Premium }}</td>
+            <td>{{ i.NewConfirmed|intcomma }}</td>
+            <td>{{ i.TotalConfirmed|intcomma }}</td>
+            <td>{{ i.NewDeaths|intcomma }}</td>
+            <td>{{ i.TotalDeaths|intcomma }}</td>
+            <td>{{ i.NewRecovered|intcomma }}</td>
+            <td>{{ i.TotalRecovered|intcomma }}</td>
+            <td>{{ i.Date|slice:":10"}}</td>
         </tr>
     {% empty %}
     <ul>Nothing found</ul>
     {% endfor %}
     </table>
 
-    <script src="/static/getapiinfo/js/TweenJS-1.0.0/lib/tweenjs.js"></script>
-    <script src="/static/getapiinfo/js/TweenJS-1.0.0/src/tweenjs/plugins/CSSPlugin.js"></script>
+    <div class="container" style="width: 75%;">
+        <h2>Top Cases by Country Chart</h2>
+        <div>
+            <canvas id="total-cases"></canvas>
+        </div>
+    </div>
 
-    {% block js %}
-    <script src="/static/getapiinfo/js/app.js"></script>
-    {% endblock js %}
+    {% comment %} <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    {% endcomment %}
+                    <script> 
+
+    function dspChrt(country, total) {
+
+        var ctx = document.getElementById('total-cases').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: country,
+                datasets: [{
+                    label: 'Total Cases',
+                    data: total, // json value received used in method
+                    backgroundColor: "rgba(153,255,51,0.4)"
+                }]
+            }
+        });
+    }
+
+    function loadChart(){
+        var data, allCountry = [], allTotal = [], country = [], total = [];
+        
+        var requestURL = 'https://api.covid19api.com/summary'; //URL of the JSON data
+        var request = new XMLHttpRequest({mozSystem: true}); // create http request  
+
+        request.onreadystatechange = function() {
+            if(request.readyState == 4 && request.status == 200) {
+                data = JSON.parse(request.responseText);
+                //data = JSONdata;
+                console.log(data.Countries[1])
+                for (var i=0; i<data.Countries.length;i++) {
+                    allCountry.push(data.Countries[i].Country);
+                    allTotal.push(data.Countries[i].TotalConfirmed);
+                }
+
+                //1) combine the arrays:
+                var list = [];
+                for (var j = 0; j < allCountry.length; j++) 
+                    list.push({'country': allCountry[j], 'total': allTotal[j]});
+
+                //2) sort:
+                list.sort(function(a, b) {
+                    return ((b.total < a.total) ? -1 : ((b.total == a.total) ? 0 : 1));
+                    //Sort could be modified to, for example, sort on the age 
+                    // if the name is the same.
+                });
+
+                //3) separate them back out:
+                for (var k = 0; k < list.length; k++) {
+                    allCountry[k] = list[k].country;
+                    allTotal[k] = list[k].total;
+                }
+                
+                for (var i=0; i<15;i++) {
+                    country.push(allCountry[i]);
+                    total.push(allTotal[i]);
+                }
+                
+                /*
+                console.log('hum', hum);
+                console.log('vibrate', vibrate);
+                console.log('data', data);
+                */      
+                dspChrt(country, total);                
+            }
+        } 
+        request.open('GET', requestURL);
+        request.send(); // send the request
+
+    }
+    loadChart();
+    </script>
 </body>
 </html>
