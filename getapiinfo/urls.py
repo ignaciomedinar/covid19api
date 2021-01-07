@@ -2,7 +2,7 @@ from django.urls import path
 from .import views
 
 urlpatterns = [
-    path('vo',views.ok),
-    path('',views.home,name='home'),
-    # url(r"^api/", 'loc_search', name="search")
+    path('',views.home),
+    path('table/',views.table,name='table'),
+    path('charts/', views.charts, name='charts'),
 ]

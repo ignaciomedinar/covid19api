@@ -3,10 +3,10 @@ import requests, json
 # from .filters import OrderFilter
 
 # Create your views here.
-def ok(request):
-    return render(request,'ok.html')
-
 def home(request):
+    return render(request,'base.html')
+
+def table(request):
     args = {}
     response=requests.get('https://api.covid19api.com/summary')
     args['contents'] = response.json()
@@ -20,3 +20,6 @@ def home(request):
     # data = json.load(json_obj)
 
     return render(request,'getapiinfo/home.html',args)
+
+def charts(request):
+    return render(request,'getapiinfo/charts.html')
