@@ -67,4 +67,4 @@ function loadChart(){
     request.send(); // send the request
 
 }
-loadChart();
+// loadChart();
